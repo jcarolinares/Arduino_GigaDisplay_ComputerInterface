@@ -90,6 +90,22 @@ static void button_event_callback(lv_event_t * e) {
     Keyboard.media_control(KEY_VOLUME_DOWN);
     rgb.on(0, 0, 255);
   }
+  else if(label_read=="SCREENSHOT"){
+    Keyboard.key_code(KEY_PRINT_SCREEN);
+    rgb.on(0, 0, 255);
+  }
+  else if(label_read=="LOCK"){
+    Keyboard.key_code('l',KEY_LOGO);
+    rgb.on(0, 0, 255);
+  }
+  else if(label_read=="UNDO"){
+    Keyboard.key_code('z',KEY_CTRL);
+    rgb.on(0, 0, 255);
+  }
+  else if(label_read=="REDO"){
+    Keyboard.key_code('z',KEY_CTRL | KEY_SHIFT);
+    rgb.on(0, 0, 255);
+  }
   rgb.off();
 }
 
@@ -102,9 +118,9 @@ void setup() {
 
   //Graphical Layout Creation
 
-  /* Create a container with grid 2x2 */
+  /* Create a container with grid 4x4 */
   static lv_coord_t col_dsc[] = {377, 377, 377, 377, LV_GRID_TEMPLATE_LAST};
-  static lv_coord_t row_dsc[] = {215, 215, LV_GRID_TEMPLATE_LAST};
+  static lv_coord_t row_dsc[] = {215, 215, 215, 215, LV_GRID_TEMPLATE_LAST};
   lv_obj_t * cont = lv_obj_create(lv_scr_act());
   lv_obj_set_grid_dsc_array(cont, col_dsc, row_dsc);
   lv_obj_set_size(cont, Display.width(), Display.height());
@@ -113,7 +129,7 @@ void setup() {
 
   lv_obj_t * label;
   lv_obj_t * obj;
-  lv_obj_t * button;   // This will be the button object
+  lv_obj_t * button;
 
   // Button 0,0
   button = lv_btn_create(cont);
@@ -195,6 +211,45 @@ void setup() {
   lv_obj_center(label);
   lv_obj_add_event_cb(button, button_event_callback, LV_EVENT_CLICKED, NULL);
 
+  // Button 3,1
+  button = lv_btn_create(cont);
+  lv_obj_set_grid_cell(button, LV_GRID_ALIGN_STRETCH, 0, 1, LV_GRID_ALIGN_STRETCH, 2, 1);
+  // lv_obj_set_size(button, 370, 215);
+  lv_obj_center(button);
+  label = lv_label_create(button);
+  lv_label_set_text(label, "SCREENSHOT");
+  lv_obj_center(label);
+  lv_obj_add_event_cb(button, button_event_callback, LV_EVENT_CLICKED, NULL);
+
+  // Button 3,2
+  button = lv_btn_create(cont);
+  lv_obj_set_grid_cell(button, LV_GRID_ALIGN_STRETCH, 1, 1, LV_GRID_ALIGN_STRETCH, 2, 1);
+  // lv_obj_set_size(button, 370, 215);
+  lv_obj_center(button);
+  label = lv_label_create(button);
+  lv_label_set_text(label, "LOCK");
+  lv_obj_center(label);
+  lv_obj_add_event_cb(button, button_event_callback, LV_EVENT_CLICKED, NULL);
+
+  // Button 3,3
+  button = lv_btn_create(cont);
+  lv_obj_set_grid_cell(button, LV_GRID_ALIGN_STRETCH, 0, 1, LV_GRID_ALIGN_STRETCH, 3, 1);
+  // lv_obj_set_size(button, 370, 215);
+  lv_obj_center(button);
+  label = lv_label_create(button);
+  lv_label_set_text(label, "UNDO");
+  lv_obj_center(label);
+  lv_obj_add_event_cb(button, button_event_callback, LV_EVENT_CLICKED, NULL);
+
+  // Button 3,4
+  button = lv_btn_create(cont);
+  lv_obj_set_grid_cell(button, LV_GRID_ALIGN_STRETCH, 1, 1, LV_GRID_ALIGN_STRETCH, 3, 1);
+  // lv_obj_set_size(button, 370, 215);
+  lv_obj_center(button);
+  label = lv_label_create(button);
+  lv_label_set_text(label, "REDO");
+  lv_obj_center(label);
+  lv_obj_add_event_cb(button, button_event_callback, LV_EVENT_CLICKED, NULL);
 
 }
 
