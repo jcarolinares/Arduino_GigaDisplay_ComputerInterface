@@ -12,14 +12,16 @@ DONE - Improve buttons aligment, small disaligment right side more space than le
 DONE - Experiment with color of the background
 TODO - Experiment with colors of the buttons
 DONE - Make blink the RGB LED as an additional feedback
-IN PROGRESS - Extend Buttons and capabilities by groups
-  1-Meetings control
-  2-Music Control
-  3-Computer tools/control
+DONE - Extend Buttons and capabilities by groups
+  DONE - 1-Meetings control 
+  DONE - 2-Music Control
+  DONE -3-Computer tools/control
 */
 
 // Additional documentation: https://docs.lvgl.io/master/API/misc/lv_area.html#_CPPv410lv_align_t
     // lv_label_set_text_fmt(label, "Clicked!");
+
+#include "buttons_config.h" // Go to this file to customize your buttons
 
 // Giga Display Shield Libraries
 #include <Arduino_GigaDisplay.h>
@@ -50,14 +52,10 @@ static void button_event_callback(lv_event_t * e) {
 
   // Button pressed actions
   if(label_read=="TALK"){
-    // lv_label_set_text_fmt(label, "Clicked!");
-    // Keyboard.media_control(KEY_MUTE);
-    // Keyboard.key_code_raw(0x4f, KEY_SHIFT | KEY_ALT);
     Keyboard.key_code('d', KEY_CTRL);
     rgb.on(0, 0, 255);
   }
   else if(label_read=="MUTE AUDIO"){
-    // lv_label_set_text_fmt(label, "Clicked!");
     Keyboard.media_control(KEY_MUTE);
     Keyboard.key_code('c', KEY_SHIFT);
     rgb.on(0, 0, 255);
@@ -106,6 +104,22 @@ static void button_event_callback(lv_event_t * e) {
     Keyboard.key_code('z',KEY_CTRL | KEY_SHIFT);
     rgb.on(0, 0, 255);
   }
+  else if(label_read=="SLACK"){
+    Keyboard.key_code('6',KEY_LOGO); // Ubuntu layout. Depends of app bar
+    rgb.on(0, 0, 255);
+  }
+  else if(label_read=="SPOTIFY"){
+    Keyboard.key_code('4',KEY_LOGO); // Ubuntu layout. Depends of app bar
+    rgb.on(0, 0, 255);
+  }
+  else if(label_read=="BROWSER"){
+    Keyboard.key_code('1',KEY_LOGO); // Ubuntu layout. Depends of app bar
+    rgb.on(0, 0, 255);
+  }
+  else if(label_read=="VSCODE"){
+    Keyboard.key_code('5',KEY_LOGO); // Ubuntu layout. Depends of app bar
+    rgb.on(0, 0, 255);
+  }
   rgb.off();
 }
 
@@ -131,126 +145,23 @@ void setup() {
   lv_obj_t * obj;
   lv_obj_t * button;
 
-  // Button 0,0
-  button = lv_btn_create(cont);
-  lv_obj_set_grid_cell(button, LV_GRID_ALIGN_STRETCH, 0, 1, LV_GRID_ALIGN_STRETCH, 0, 1);
-  // lv_obj_set_size(button, 370, 215);
-  lv_obj_center(button);
-  label = lv_label_create(button);
-  lv_label_set_text(label, "TALK");
-  lv_obj_center(label);
-  lv_obj_add_event_cb(button, button_event_callback, LV_EVENT_CLICKED, NULL);
-
-  // Button 1,0
-  button = lv_btn_create(cont);
-  lv_obj_set_grid_cell(button, LV_GRID_ALIGN_STRETCH, 1, 1, LV_GRID_ALIGN_STRETCH, 0, 1);
-  // lv_obj_set_size(button, 370, 215);
-  lv_obj_center(button);
-  label = lv_label_create(button);
-  lv_label_set_text(label, "CAMERA");
-  lv_obj_center(label);
-  lv_obj_add_event_cb(button, button_event_callback, LV_EVENT_CLICKED, NULL);
-
-  // Button 0,1
-  button = lv_btn_create(cont);
-  lv_obj_set_grid_cell(button, LV_GRID_ALIGN_STRETCH, 0, 1, LV_GRID_ALIGN_STRETCH, 1, 1);
-  // lv_obj_set_size(button, 370, 215);
-  lv_obj_center(button);
-  label = lv_label_create(button);
-  lv_label_set_text(label, "MUTE AUDIO");
-  lv_obj_center(label);
-  lv_obj_add_event_cb(button, button_event_callback, LV_EVENT_CLICKED, NULL);
-
-  // Button 1,1
-  button = lv_btn_create(cont);
-  lv_obj_set_grid_cell(button, LV_GRID_ALIGN_STRETCH, 1, 1, LV_GRID_ALIGN_STRETCH, 1, 1);
-  // lv_obj_set_size(button, 370, 215);
-  lv_obj_center(button);
-  label = lv_label_create(button);
-  lv_label_set_text(label, "RAISE HAND");
-  lv_obj_center(label);
-  lv_obj_add_event_cb(button, button_event_callback, LV_EVENT_CLICKED, NULL);
-
-  // Button 2,1
-  button = lv_btn_create(cont);
-  lv_obj_set_grid_cell(button, LV_GRID_ALIGN_STRETCH, 2, 1, LV_GRID_ALIGN_STRETCH, 0, 1);
-  // lv_obj_set_size(button, 370, 215);
-  lv_obj_center(button);
-  label = lv_label_create(button);
-  lv_label_set_text(label, "PLAY/PAUSE");
-  lv_obj_center(label);
-  lv_obj_add_event_cb(button, button_event_callback, LV_EVENT_CLICKED, NULL);
-
-  // Button 2,2
-  button = lv_btn_create(cont);
-  lv_obj_set_grid_cell(button, LV_GRID_ALIGN_STRETCH, 2, 1, LV_GRID_ALIGN_STRETCH, 1, 1);
-  // lv_obj_set_size(button, 370, 215);
-  lv_obj_center(button);
-  label = lv_label_create(button);
-  lv_label_set_text(label, "NEXT SONG");
-  lv_obj_center(label);
-  lv_obj_add_event_cb(button, button_event_callback, LV_EVENT_CLICKED, NULL);
-
-  // Button 2,1
-  button = lv_btn_create(cont);
-  lv_obj_set_grid_cell(button, LV_GRID_ALIGN_STRETCH, 3, 1, LV_GRID_ALIGN_STRETCH, 0, 1);
-  // lv_obj_set_size(button, 370, 215);
-  lv_obj_center(button);
-  label = lv_label_create(button);
-  lv_label_set_text(label, "VOL+");
-  lv_obj_center(label);
-  lv_obj_add_event_cb(button, button_event_callback, LV_EVENT_CLICKED, NULL);
-
-  // Button 2,2
-  button = lv_btn_create(cont);
-  lv_obj_set_grid_cell(button, LV_GRID_ALIGN_STRETCH, 3, 1, LV_GRID_ALIGN_STRETCH, 1, 1);
-  // lv_obj_set_size(button, 370, 215);
-  lv_obj_center(button);
-  label = lv_label_create(button);
-  lv_label_set_text(label, "VOL-");
-  lv_obj_center(label);
-  lv_obj_add_event_cb(button, button_event_callback, LV_EVENT_CLICKED, NULL);
-
-  // Button 3,1
-  button = lv_btn_create(cont);
-  lv_obj_set_grid_cell(button, LV_GRID_ALIGN_STRETCH, 0, 1, LV_GRID_ALIGN_STRETCH, 2, 1);
-  // lv_obj_set_size(button, 370, 215);
-  lv_obj_center(button);
-  label = lv_label_create(button);
-  lv_label_set_text(label, "SCREENSHOT");
-  lv_obj_center(label);
-  lv_obj_add_event_cb(button, button_event_callback, LV_EVENT_CLICKED, NULL);
-
-  // Button 3,2
-  button = lv_btn_create(cont);
-  lv_obj_set_grid_cell(button, LV_GRID_ALIGN_STRETCH, 1, 1, LV_GRID_ALIGN_STRETCH, 2, 1);
-  // lv_obj_set_size(button, 370, 215);
-  lv_obj_center(button);
-  label = lv_label_create(button);
-  lv_label_set_text(label, "LOCK");
-  lv_obj_center(label);
-  lv_obj_add_event_cb(button, button_event_callback, LV_EVENT_CLICKED, NULL);
-
-  // Button 3,3
-  button = lv_btn_create(cont);
-  lv_obj_set_grid_cell(button, LV_GRID_ALIGN_STRETCH, 0, 1, LV_GRID_ALIGN_STRETCH, 3, 1);
-  // lv_obj_set_size(button, 370, 215);
-  lv_obj_center(button);
-  label = lv_label_create(button);
-  lv_label_set_text(label, "UNDO");
-  lv_obj_center(label);
-  lv_obj_add_event_cb(button, button_event_callback, LV_EVENT_CLICKED, NULL);
-
-  // Button 3,4
-  button = lv_btn_create(cont);
-  lv_obj_set_grid_cell(button, LV_GRID_ALIGN_STRETCH, 1, 1, LV_GRID_ALIGN_STRETCH, 3, 1);
-  // lv_obj_set_size(button, 370, 215);
-  lv_obj_center(button);
-  label = lv_label_create(button);
-  lv_label_set_text(label, "REDO");
-  lv_obj_center(label);
-  lv_obj_add_event_cb(button, button_event_callback, LV_EVENT_CLICKED, NULL);
-
+  // Buttons Layout Genertion - Go to buttons_config.h to edit them
+  for (int i=0; i<4; i++){
+    for (int j=0; j<4; j++){
+      Serial.print("i,j, tag: ");
+      Serial.print(i);
+      Serial.print(j);
+      Serial.println(button_labels[i][j]);
+      button = lv_btn_create(cont);
+      lv_obj_set_grid_cell(button, LV_GRID_ALIGN_STRETCH, j, 1, LV_GRID_ALIGN_STRETCH, i, 1);
+      // lv_obj_set_size(button, 370, 215);
+      lv_obj_center(button);
+      label = lv_label_create(button);
+      lv_label_set_text(label, button_labels[i][j]);
+      lv_obj_center(label);
+      lv_obj_add_event_cb(button, button_event_callback, LV_EVENT_CLICKED, NULL);
+    }
+  }
 }
 
 void loop() { 
