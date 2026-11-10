@@ -32,87 +32,17 @@ Arduino_GigaDisplayTouch TouchDetector;
 USBKeyboard Keyboard;
 
 // Callbacks
-// Buttons actions callback function
+// Buttons actions callback function. The pressed button's index (row * 4 + column)
+// is stored in the event user data; its action is defined in buttons_config.h
 static void button_event_callback(lv_event_t * e) {
-  // Get the button object that triggered the event
-  lv_obj_t * btn = (lv_obj_t *)lv_event_get_target(e);
-  // Get the first child of the button, which is the label in this case
-  lv_obj_t * label = lv_obj_get_child(btn, 0);
+  int index = (int)(intptr_t)lv_event_get_user_data(e);
+  const ButtonConfig &config = buttons[index / 4][index % 4];
 
-  String label_read = String(lv_label_get_text(label));
-  // Serial.println(label_read);
-
-  // Button pressed actions
-  if(label_read=="TALK"){
-    Keyboard.key_code('d', KEY_CTRL);
+  if (config.action != nullptr) {
     rgb.on(0, 0, 255);
+    config.action();
+    rgb.off();
   }
-  else if(label_read=="MUTE AUDIO"){
-    Keyboard.media_control(KEY_MUTE);
-    Keyboard.key_code('c', KEY_SHIFT);
-    rgb.on(0, 0, 255);
-  }
-  else if(label_read=="CAMERA"){
-    Keyboard.key_code('e', KEY_CTRL);
-    rgb.on(0, 0, 255);
-  }
-  else if(label_read=="RAISE HAND"){
-    Keyboard.key_code('h', KEY_CTRL | KEY_ALT);
-    rgb.on(0, 0, 255);
-  }
-  else if(label_read=="FULLSCREEN"){
-    Keyboard.key_code(KEY_F11);
-    rgb.on(0, 0, 255);
-  }
-  else if(label_read=="PLAY/PAUSE"){
-    Keyboard.media_control(KEY_PLAY_PAUSE);
-    rgb.on(0, 0, 255);
-  }
-  else if(label_read=="NEXT SONG"){
-    Keyboard.media_control(KEY_NEXT_TRACK);
-    rgb.on(0, 0, 255);
-  }
-  else if(label_read=="VOL+"){
-    Keyboard.media_control(KEY_VOLUME_UP);
-    rgb.on(0, 0, 255);
-  }
-  else if(label_read=="VOL-"){
-    Keyboard.media_control(KEY_VOLUME_DOWN);
-    rgb.on(0, 0, 255);
-  }
-  else if(label_read=="SCREENSHOT"){
-    Keyboard.key_code(KEY_PRINT_SCREEN);
-    rgb.on(0, 0, 255);
-  }
-  else if(label_read=="LOCK"){
-    Keyboard.key_code('l',KEY_LOGO);
-    rgb.on(0, 0, 255);
-  }
-  else if(label_read=="UNDO"){
-    Keyboard.key_code('z',KEY_CTRL);
-    rgb.on(0, 0, 255);
-  }
-  else if(label_read=="REDO"){
-    Keyboard.key_code('z',KEY_CTRL | KEY_SHIFT);
-    rgb.on(0, 0, 255);
-  }
-  else if(label_read=="SLACK"){
-    Keyboard.key_code('6',KEY_LOGO); // Ubuntu layout. Depends of app bar
-    rgb.on(0, 0, 255);
-  }
-  else if(label_read=="SPOTIFY"){
-    Keyboard.key_code('4',KEY_LOGO); // Ubuntu layout. Depends of app bar
-    rgb.on(0, 0, 255);
-  }
-  else if(label_read=="BROWSER"){
-    Keyboard.key_code('1',KEY_LOGO); // Ubuntu layout. Depends of app bar
-    rgb.on(0, 0, 255);
-  }
-  else if(label_read=="VSCODE"){
-    Keyboard.key_code('5',KEY_LOGO); // Ubuntu layout. Depends of app bar
-    rgb.on(0, 0, 255);
-  }
-  rgb.off();
 }
 
 void setup() {
@@ -146,15 +76,15 @@ void setup() {
       Serial.print("i,j, tag: ");
       Serial.print(i);
       Serial.print(j);
-      Serial.println(button_labels[i][j]);
+      Serial.println(buttons[i][j].label);
       button = lv_btn_create(cont);
       lv_obj_set_grid_cell(button, LV_GRID_ALIGN_STRETCH, j, 1, LV_GRID_ALIGN_STRETCH, i, 1);
       // lv_obj_set_size(button, 370, 215);
       lv_obj_center(button);
       label = lv_label_create(button);
-      lv_label_set_text(label, button_labels[i][j]);
+      lv_label_set_text(label, buttons[i][j].label);
       lv_obj_center(label);
-      lv_obj_add_event_cb(button, button_event_callback, LV_EVENT_CLICKED, NULL);
+      lv_obj_add_event_cb(button, button_event_callback, LV_EVENT_CLICKED, (void *)(intptr_t)(i * 4 + j));
     }
   }
 }
