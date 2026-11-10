@@ -6,20 +6,8 @@
   CC-BY-SA
 */
 
-/*
-TASKS LIST
-DONE - Improve buttons aligment, small disaligment right side more space than left one
-DONE - Experiment with color of the background
-TODO - Experiment with colors of the buttons
-DONE - Make blink the RGB LED as an additional feedback
-DONE - Extend Buttons and capabilities by groups
-  DONE - 1-Meetings control 
-  DONE - 2-Music Control
-  DONE -3-Computer tools/control
-*/
 
 // Additional documentation: https://docs.lvgl.io/master/API/misc/lv_area.html#_CPPv410lv_align_t
-    // lv_label_set_text_fmt(label, "Clicked!");
 
 #include "buttons_config.h" // Go to this file to customize your buttons
 
@@ -28,6 +16,10 @@ DONE - Extend Buttons and capabilities by groups
 #include "Arduino_H7_Video.h"
 #include "Arduino_GigaDisplayTouch.h"
 #include "lvgl.h"
+
+// Bundled font (ui_font_montserrat_32.c in this sketch folder), so it works
+// without enabling extra fonts in the core's lv_conf.h
+LV_FONT_DECLARE(ui_font_montserrat_32);
 
 // HID Libraries
 #include "PluggableUSBHID.h"
@@ -129,6 +121,9 @@ void setup() {
   Display.begin();
   TouchDetector.begin();
   rgb.begin();
+
+  // Default font for the whole screen (inherited by all labels)
+  lv_obj_set_style_text_font(lv_scr_act(), &ui_font_montserrat_32, 0);
 
   //Graphical Layout Creation
 
