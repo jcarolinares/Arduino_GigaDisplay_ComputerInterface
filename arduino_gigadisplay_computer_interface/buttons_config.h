@@ -25,14 +25,14 @@ struct ButtonConfig {
 };
 
 const ButtonConfig buttons[4][4] = {
-  // Row 1 - Meetings / Music
+  // Section 0,0
   {
     {"TALK",       []{ Keyboard.key_code('d', KEY_CTRL); }},
     {"CAMERA",     []{ Keyboard.key_code('e', KEY_CTRL); }},
     {"PLAY/PAUSE", []{ Keyboard.media_control(KEY_PLAY_PAUSE); }},
     {"VOL+",       []{ Keyboard.media_control(KEY_VOLUME_UP); }},
   },
-  // Row 2 - Meetings / Music
+  // Section 0,1
   {
     {"MUTE AUDIO", []{ Keyboard.media_control(KEY_MUTE);
                        Keyboard.key_code('c', KEY_SHIFT); }},
@@ -40,14 +40,14 @@ const ButtonConfig buttons[4][4] = {
     {"NEXT SONG",  []{ Keyboard.media_control(KEY_NEXT_TRACK); }},
     {"VOL-",       []{ Keyboard.media_control(KEY_VOLUME_DOWN); }},
   },
-  // Row 3 - Computer tools (app shortcuts use the Ubuntu dock order)
+  // Section 1,0
   {
     {"SCREENSHOT", []{ Keyboard.key_code(KEY_PRINT_SCREEN); }},
-    {"LOCK",       []{ Keyboard.key_code('l', KEY_LOGO); }},
+    {"LOCK",       []{ Keyboard.key_code('l', KEY_LOGO | KEY_SHIFT); }},
     {"SLACK",      []{ Keyboard.key_code('6', KEY_LOGO); }},
     {"SPOTIFY",    []{ Keyboard.key_code('4', KEY_LOGO); }},
   },
-  // Row 4 - Computer tools
+  // Section 1,1
   {
     {"UNDO",       []{ Keyboard.key_code('z', KEY_CTRL); }},
     {"REDO",       []{ Keyboard.key_code('z', KEY_CTRL | KEY_SHIFT); }},
@@ -55,3 +55,22 @@ const ButtonConfig buttons[4][4] = {
     {"VSCODE",     []{ Keyboard.key_code('5', KEY_LOGO); }},
   },
 };
+
+/*
+  Clap detection
+
+  Clap CLAPS_REQUIRED times in a steady rhythm to run clap_action().
+  It is independent from the buttons: change clap_action() to do anything else.
+
+  Tuning: set CLAP_DEBUG to true and open the Serial Plotter. Clap a few times
+  and set CLAP_THRESHOLD a bit below the peaks you see.
+*/
+#define CLAP_ENABLED        true
+#define CLAP_THRESHOLD      8000  // Loudness (0-32767) that counts as a clap
+#define CLAPS_REQUIRED      3
+#define CLAP_DEBUG          false  // Print loudness to the Serial Plotter
+
+void clap_action() {
+  Keyboard.key_code('l', KEY_LOGO | KEY_SHIFT); // Lock the computer
+}
+

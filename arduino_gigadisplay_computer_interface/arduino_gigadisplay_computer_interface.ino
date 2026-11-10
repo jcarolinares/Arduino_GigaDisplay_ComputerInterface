@@ -25,6 +25,9 @@ LV_FONT_DECLARE(ui_font_montserrat_32);
 #include "PluggableUSBHID.h"
 #include "USBKeyboard.h"
 
+// Microphone library (clap detection)
+#include <PDM.h>
+
 // Objects declaration
 GigaDisplayRGB rgb;
 Arduino_H7_Video Display(800, 480, GigaDisplayShield);
@@ -45,12 +48,92 @@ static void button_event_callback(lv_event_t * e) {
   }
 }
 
+// Clap detection - settings and clap_action() are in buttons_config.h
+#define CLAP_MIN_GAP_MS     150   // Ignore sounds closer than this (echo of the same clap)
+#define CLAP_MAX_GAP_MS     800   // Longer pause between claps restarts the count
+#define CLAP_COOLDOWN_MS    3000  // Ignore claps for a while after the action runs
+
+short micBuffer[512];               // Audio samples, filled by the microphone interrupt
+volatile int micPeak = 0;           // Loudest sample since the last check
+volatile bool micDataReady = false;
+
+int clapCount = 0;
+unsigned long lastClapTime = 0;
+unsigned long actionTime = 0;
+bool inCooldown = false;
+
+// Called by the microphone (interrupt): keep it short, just store the loudest sample
+void onPDMdata() {
+  int bytesAvailable = PDM.available();
+  PDM.read(micBuffer, bytesAvailable);
+  int samples = bytesAvailable / 2; // 16-bit samples
+
+  int peak = micPeak;
+  for (int i = 0; i < samples; i++) {
+    int level = abs((int)micBuffer[i]);
+    if (level > peak) peak = level;
+  }
+  micPeak = peak;
+  micDataReady = true;
+}
+
+// Called from loop(): counts claps and runs clap_action() after CLAPS_REQUIRED
+void check_claps() {
+  if (!micDataReady) return;
+
+  noInterrupts();
+  int peak = micPeak;
+  micPeak = 0;
+  micDataReady = false;
+  interrupts();
+
+  unsigned long now = millis();
+
+  if (CLAP_DEBUG) Serial.println(peak);
+
+  // After the action, wait before listening again
+  if (inCooldown) {
+    if (now - actionTime < CLAP_COOLDOWN_MS) return;
+    inCooldown = false;
+    rgb.off();
+  }
+
+  // Pause too long: start over
+  if (clapCount > 0 && now - lastClapTime > CLAP_MAX_GAP_MS) {
+    clapCount = 0;
+    rgb.off();
+  }
+
+  if (peak < CLAP_THRESHOLD) return;
+  if (clapCount > 0 && now - lastClapTime < CLAP_MIN_GAP_MS) return; // Same clap
+
+  clapCount++;
+  lastClapTime = now;
+  rgb.on(255, 255, 0); // Yellow: clap counted
+
+  if (clapCount >= CLAPS_REQUIRED) {
+    rgb.on(255, 0, 0); // Red: action sent
+    clap_action();
+    clapCount = 0;
+    actionTime = now;
+    inCooldown = true;
+  }
+}
+
 void setup() {
   Serial.begin(115200);
 
   Display.begin();
   TouchDetector.begin();
   rgb.begin();
+
+  // Microphone for clap detection
+  if (CLAP_ENABLED) {
+    PDM.onReceive(onPDMdata);
+    if (!PDM.begin(1, 16000)) { // Mono, 16 kHz
+      Serial.println("Failed to start the microphone!");
+    }
+  }
 
   // Default font for the whole screen (inherited by all labels)
   lv_obj_set_style_text_font(lv_scr_act(), &ui_font_montserrat_32, 0);
@@ -89,6 +172,7 @@ void setup() {
   }
 }
 
-void loop() { 
+void loop() {
   lv_timer_handler();
+  if (CLAP_ENABLED) check_claps();
 }
