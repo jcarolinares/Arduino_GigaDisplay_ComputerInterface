@@ -66,7 +66,7 @@ const ButtonConfig buttons[4][4] = {
   and set CLAP_THRESHOLD a bit below the peaks you see.
 */
 #define CLAP_ENABLED        true
-#define CLAP_THRESHOLD      8000  // Loudness (0-32767) that counts as a clap
+#define CLAP_THRESHOLD      7000  // Loudness (0-32767) that counts as a clap
 #define CLAPS_REQUIRED      3
 #define CLAP_DEBUG          false  // Print loudness to the Serial Plotter
 

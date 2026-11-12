@@ -17,6 +17,12 @@
 #include "Arduino_GigaDisplayTouch.h"
 #include "lvgl.h"
 
+// This sketch needs LVGL 8.3.x. Newer LVGL versions don't build with the GIGA core.
+// Install it from the Library Manager and don't accept LVGL update prompts.
+#if LVGL_VERSION_MAJOR != 8
+  #error "Install LVGL 8.3.11 from the Library Manager (newer versions are not supported)"
+#endif
+
 // Bundled font (ui_font_montserrat_32.c in this sketch folder), so it works
 // without enabling extra fonts in the core's lv_conf.h
 LV_FONT_DECLARE(ui_font_montserrat_32);
@@ -52,6 +58,7 @@ static void button_event_callback(lv_event_t * e) {
 #define CLAP_MIN_GAP_MS     150   // Ignore sounds closer than this (echo of the same clap)
 #define CLAP_MAX_GAP_MS     800   // Longer pause between claps restarts the count
 #define CLAP_COOLDOWN_MS    3000  // Ignore claps for a while after the action runs
+#define MIC_WARMUP_MS       2000  // Ignore the microphone right after it starts (startup noise)
 
 short micBuffer[512];               // Audio samples, filled by the microphone interrupt
 volatile int micPeak = 0;           // Loudest sample since the last check
@@ -61,6 +68,8 @@ int clapCount = 0;
 unsigned long lastClapTime = 0;
 unsigned long actionTime = 0;
 bool inCooldown = false;
+bool wasLoud = false;               // Last chunk was above the threshold
+unsigned long micStartTime = 0;
 
 // Called by the microphone (interrupt): keep it short, just store the loudest sample
 void onPDMdata() {
@@ -91,6 +100,15 @@ void check_claps() {
 
   if (CLAP_DEBUG) Serial.println(peak);
 
+  // A clap is the moment sound goes from quiet to loud, so a long
+  // loud sound (music, noise) counts as one clap at most
+  bool loud = peak >= CLAP_THRESHOLD;
+  bool newClap = loud && !wasLoud;
+  wasLoud = loud;
+
+  // Microphone still settling after start
+  if (now - micStartTime < MIC_WARMUP_MS) return;
+
   // After the action, wait before listening again
   if (inCooldown) {
     if (now - actionTime < CLAP_COOLDOWN_MS) return;
@@ -104,7 +122,7 @@ void check_claps() {
     rgb.off();
   }
 
-  if (peak < CLAP_THRESHOLD) return;
+  if (!newClap) return;
   if (clapCount > 0 && now - lastClapTime < CLAP_MIN_GAP_MS) return; // Same clap
 
   clapCount++;
@@ -133,6 +151,7 @@ void setup() {
     if (!PDM.begin(1, 16000)) { // Mono, 16 kHz
       Serial.println("Failed to start the microphone!");
     }
+    micStartTime = millis();
   }
 
   // Default font for the whole screen (inherited by all labels)
